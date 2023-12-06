@@ -39,7 +39,7 @@ basic <- c("subjectkey", "interview_age", "sex", "race_ethnicity",
   "rel_family_id", "income_parent", "edu_parent")
 peers <- c("pbp_ss_prosocial_peers", "pbp_ss_rule_break")
 
-# additional confoundings
+# additional confounding variables
 confounds_year2 <- c("resiliency5a_y", "resiliency6a_y", "fes_p_ss_fc",
   "nsc_p_ss_mean_3_items", "srpf_y_ss_ses", "srpf_y_ss_iiss", "srpf_y_ss_dfs")
 confounds_year3 <- c("resiliency5a_y", "resiliency6a_y", "fes_p_ss_fc",
@@ -90,8 +90,8 @@ lmm_vars <- function(var) {
     cat("\n", x, "   Particpant:", nrow(df))
     fit <- lmer(df[[x]] ~ df[[var]] + sex + interview_age + race_ethnicity +
       income_parent + edu_parent + resiliency5a_y + resiliency6a_y +
-        fes_p_ss_fc + nsc_p_ss_mean_3_items + srpf_y_ss_ses + srpf_y_ss_iiss +
-        srpf_y_ss_dfs + (1|site_id_l/rel_family_id), data = df)
+      fes_p_ss_fc + nsc_p_ss_mean_3_items + srpf_y_ss_ses + srpf_y_ss_iiss +
+      srpf_y_ss_dfs + (1|site_id_l/rel_family_id), data = df)
     fit_summary <- summary(fit)
     # 3 df; 4 t-value; 5 p-value
     t_value <- fit_summary$coefficients[2, 4]
@@ -143,8 +143,8 @@ lmm_vars <- function(var) {
 
   # output
   results <- list(result_behavior, result_networks, result_network_subcortical,
-                  result_thick, result_area, result_vol_cortical, result_vol_subcortical,
-                  result_smri)
+    result_thick, result_area, result_vol_cortical, result_vol_subcortical,
+    result_smri)
   names(results) <- c("behavior", "networks",  "network_sub", "thick", "area",
                       "vol_cortical", "vol_subcortical", "sMRI")
 
@@ -202,7 +202,7 @@ write.table(area_PFI, "tmap_area_PFI.txt", col.names = FALSE, row.names = FALSE)
 write.table(area_DFI, "tmap_area_DFI.txt", col.names = FALSE, row.names = FALSE)
 
 # load results (results from JuSpace) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Neurotransmitters <- read.csv("pet/Resh.csv") %>%
+Neurotransmitters <- read.csv("Resh.csv") %>%
   rename("Spearman" = Mean.Fisher.s.z..Spearman.rho., "PET" = PET.Map) %>%
   select(File, PET, Spearman, p_exact) %>%
   mutate(PET = str_replace(PET, "SERT", "5HTT")) %>%
@@ -224,24 +224,17 @@ Neurotransmitters_area <- Neurotransmitters[str_detect(Neurotransmitters$File, "
 Neurotransmitters_thick <- Neurotransmitters[str_detect(Neurotransmitters$File, "thick"), ]
 
 # 3. Mediation Analysis --------------------------------------------------------
-# cortical volume
+# cortical and subcortical volumes
 mediation_volume <- select(abcd_year2, all_of(basic), all_of(confounds_year2),
     mri_info_deviceserialnumber, smri_vol_scs_intracranialv,  all_of(peers),
     all_of(behavior_year2), smri_vol_cdk_total, colnames(PFI1$vol_cortical),
     colnames(PFI1$vol_subcortical), smri_vol_cdk_locclh, imgincl_t1w_include) %>%
   filter(imgincl_t1w_include == 1, complete.cases(.)) %>%
-  select(-imgincl_t1w_include)
-
-mediation_volume$sex <- factor(
-  mediation_volume$sex,
-  levels = c("F", "M"),
-  labels = c(1, 0)
-)
-mediation_volume$mri_info_deviceserialnumber <- factor(
-  mediation_volume$mri_info_deviceserialnumber,
-  levels = unique(mediation_volume$mri_info_deviceserialnumber),
-  labels = seq(unique(mediation_volume$mri_info_deviceserialnumber))
-)
+  select(-imgincl_t1w_include) %>%
+  mutate(sex = factor(sex, levels = c("F", "M"), labels = c(1, 0))) %>%
+  mutate(mri_info_deviceserialnumber = factor(mri_info_deviceserialnumber,
+    levels = unique(mri_info_deviceserialnumber),
+    labels = seq(unique(mri_info_deviceserialnumber))))
 write_csv(mediation_volume, "mediation_volume.csv")
 
 # RSFC
@@ -250,129 +243,70 @@ mediation_rsfc <- select(abcd_year2, all_of(basic), all_of(confounds_year2),
     all_of(behavior_year2), colnames(PFI1$networks), colnames(DFI1$networks),
     colnames(DFI1$network_sub), imgincl_rsfmri_include) %>%
   filter(imgincl_rsfmri_include == 1, complete.cases(.)) %>%
-  select(-imgincl_rsfmri_include)
-
-mediation_rsfc$sex <- factor(mediation_rsfc$sex,
-  levels = c("F", "M"),
-  labels = c(1, 0))
-mediation_rsfc$mri_info_deviceserialnumber <- factor(
-  mediation_rsfc$mri_info_deviceserialnumber,
-  levels = unique(mediation_rsfc$mri_info_deviceserialnumber),
-  labels = seq(unique(mediation_rsfc$mri_info_deviceserialnumber))
-)
+  select(-imgincl_rsfmri_include) %>%
+  mutate(sex = factor(sex, levels = c("F", "M"), labels = c(1, 0))) %>%
+  mutate(mri_info_deviceserialnumber = factor(mri_info_deviceserialnumber,
+    levels = unique(mri_info_deviceserialnumber),
+    labels = seq(unique(mri_info_deviceserialnumber))))
 write_csv(mediation_rsfc, "mediation_rsfc.csv")
 
 # mediation analysis in Matlab  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-read_csvs <- function(files) {
-  # set row names
-  paths_p <- paste0(c("PathA", "PathB", "PathCC", "PathC", "PathAB"), "_p")
-  paths_t <- paste0(c("PathA", "PathB", "PathCC'", "PathC", "PathAB"), "_beta")
-  CI <- paste0(rep(c("A", "B", "CC", "C", "AB"), 2), rep(1:2, each = 5))
-  paths <- c(paths_p, paths_t, CI)
-
-  # read files
-  csv_file <- paste0(files, ".csv")
-  result <- read.csv(csv_file, header = FALSE)
-
-  colnames(result) <- paths
-  rownames(result) <- paste(files, "-", behavior_year2)
-  return(result)
+mediation_fdr <- function(strs, pattern, peers, replace_index) {
+  
+  # read mediation results
+  read_csvs <- function(files) {
+    # set row names
+    paths_p <- paste0(c("PathA", "PathB", "PathCC", "PathC", "PathAB"), "_p")
+    paths_t <- paste0(c("PathA", "PathB", "PathCC'", "PathC", "PathAB"), "_beta")
+    CI <- paste0(rep(c("A", "B", "CC", "C", "AB"), 2), rep(1:2, each = 5))
+    paths <- c(paths_p, paths_t, CI)
+    
+    # read files
+    csv_file <- paste0(files, ".csv")
+    result <- read.csv(csv_file, header = FALSE)
+    
+    colnames(result) <- paths
+    rownames(result) <- paste(files, "-", behavior_year2)
+    return(result)
+  }
+  
+  sig_vars <- str_split(strs, pattern, simplify = TRUE)[, 2]
+  sig_vars <- str_replace(sig_vars, replace_index, "")
+  sig_vars <- paste0(peers, sig_vars)
+  
+  mediation_results <- lapply(sig_vars, read_csvs)
+  df <- data.frame()
+  for (i in seq(mediation_results)) {
+    df <- rbind(df, mediation_results[[i]])
+  }
+  # FDR corrections
+  df[1:5] <- apply(df[1:5], 2, p.adjust, method = "fdr")
+  df <- filter(df, PathAB_p < 0.05, PathA_p < 0.05, PathB_p < 0.05,
+               PathC_p < 0.05, PathCC_p < 0.05)
+  return(df)
 }
 
-# # mediation - PFI total volume
-# PFI_volume <- read_csvs("PFI_volume")
-# PFI_volume[, 1:5] <- apply(PFI_volume[, 1:5], 2, p.adjust, method = "fdr")
-# PFI_volume <- filter(PFI_volume, PathAB_p < 0.05, PathA_p < 0.05,
-#                      PathB_p < 0.05, PathC_p < 0.05, PathCC_p < 0.05)
-#
-# # mediation - DFI total volume
-# DFI_volume <- read_csvs("DFI_volume")
-# DFI_volume[, 1:5] <- apply(DFI_volume[, 1:5], 2, p.adjust, method = "fdr")
-# DFI_volume <- filter(DFI_volume, PathAB_p < 0.05, PathA_p < 0.05,
-#                      PathB_p < 0.05, PathC_p < 0.05, PathCC_p < 0.05)
-#
-# PFI_volume_var <- str_split(row.names(PFI_volume), " - ", simplify = TRUE)[, 2]
-# DFI_volume_var <- str_split(row.names(DFI_volume), " - ", simplify = TRUE)[, 2]
-# PFI_volume_var[PFI_volume_var %in% DFI_volume_var]
+# mediation - PFI 7 regional volume (22 significant results)
+PFI_sig_volumes <- c(colnames(PFI1$vol_cortical), colnames(PFI1$vol_subcortical)) %>%
+  str_replace("scs", "cdk")
+PFI_volume_all <- mediation_fdr(PFI_sig_volumes, "smri_vol_", 
+  "PFI_", "cdk_")
 
-# mediation - PFI regional volume
-PFI_ifpllh <- read_csvs("PFI_ifpllh")
-PFI_precnlh <- read_csvs("PFI_precnlh")
-PFI_insularh <- read_csvs("PFI_insularh")
-PFI_putamenlh <- read_csvs("PFI_putamenlh")
-PFI_putamenrh <- read_csvs("PFI_putamenrh")
-PFI_pallidumrh <- read_csvs("PFI_pallidumrh")
-PFI_aar <- read_csvs("PFI_aar")
+# mediation - DFI 1 regional volume (no significant results)
+DFI_volume_all <- mediation_fdr("smri_vol_cdk_locclh", "smri_vol_", 
+  "DFI_", "cdk_")
 
-PFI_volume_all <- rbind(PFI_ifpllh, PFI_precnlh, PFI_insularh, PFI_putamenlh, 
-  PFI_putamenrh, PFI_pallidumrh, PFI_aar)
+# mediation - PFI 2 RSFCs (2 significant results)
+PFI_fc <- mediation_fdr(colnames(PFI1$networks), "rsfmri_c_ngd_", 
+  "PFI_", "ngd_")
 
-PFI_volume_all[1:5] <- apply(PFI_volume_all[1:5], 2, p.adjust, method = "fdr")
-PFI_volume_all <- filter(PFI_volume_all, PathAB_p < 0.05, PathA_p < 0.05,
-  PathB_p < 0.05, PathC_p < 0.05, PathCC_p < 0.05)
+# mediation - DFI 6 RSFCs (21 significant results)
+DFI_fc <- mediation_fdr(colnames(DFI1$networks), "rsfmri_c_ngd_", 
+  "DFI_", "ngd_")
 
-# mediation - DFI regional volume
-DFI_locclh <- read_csvs("DFI_locclh")
-
-DFI_volume_all <- DFI_locclh
-DFI_volume_all[1:5] <- apply(DFI_volume_all[1:5], 2, p.adjust, method = "fdr")
-DFI_volume_all <- filter(DFI_volume_all, PathAB_p < 0.05, PathA_p < 0.05,
-                         PathB_p < 0.05, PathC_p < 0.05, PathCC_p < 0.05)
-
-# mediation - PFI RSFC
-PFI_ad_ca <- read_csvs("PFI_ad_ca")
-PFI_ca_smh <- read_csvs("PFI_ca_smh")
-
-PFI_fc <- rbind(PFI_ad_ca, PFI_ca_smh)
-PFI_fc[1:5] <- apply(PFI_fc[1:5], 2, p.adjust, method = "fdr")
-PFI_fc <- filter(PFI_fc, PathAB_p < 0.05, PathA_p < 0.05, PathB_p < 0.05,
-                 PathC_p < 0.05, PathCC_p < 0.05)
-
-# mediation - DFI RSFC
-DFI_dt_dt <- read_csvs("DFI_dt_dt")
-DFI_dla_dla <- read_csvs("DFI_dla_dla")
-DFI_smh_smh <- read_csvs("DFI_smh_smh")
-DFI_cgc_vs <- read_csvs("DFI_cgc_vs")
-DFI_dt_dla <- read_csvs("DFI_dt_dla")
-DFI_smh_smm <- read_csvs("DFI_smh_smm")
-
-DFI_fc <- rbind(DFI_dt_dt, DFI_dla_dla, DFI_smh_smh, DFI_cgc_vs, DFI_dt_dla, 
-  DFI_smh_smm)
-DFI_fc[1:5] <- apply(DFI_fc[1:5], 2, p.adjust, method = "fdr")
-DFI_fc <- filter(DFI_fc, PathAB_p < 0.05, PathA_p < 0.05, PathB_p < 0.05,
-                 PathC_p < 0.05, PathCC_p < 0.05)
-
-# mediation - DFI cortico-subcortical FC
-DFI_cerc_thp <- read_csvs("DFI_cerc_thp")
-DFI_cerc_hp <- read_csvs("DFI_cerc_hp")
-DFI_cerc_ag <- read_csvs("DFI_cerc_ag")
-DFI_copa_crcx <- read_csvs("DFI_copa_crcx")
-DFI_copa_vtdc <- read_csvs("DFI_copa_vtdc")
-DFI_df_ag <- read_csvs("DFI_df_ag")
-DFI_df_aa <- read_csvs("DFI_df_aa")
-DFI_fopa_crcx <- read_csvs("DFI_fopa_crcx")
-DFI_fopa_thp <- read_csvs("DFI_fopa_thp")
-DFI_fopa_ag <- read_csvs("DFI_fopa_ag")
-DFI_rst_aa <- read_csvs("DFI_rst_aa")
-DFI_smh_cde <- read_csvs("DFI_smh_cde")
-DFI_smh_pt <- read_csvs("DFI_smh_pt")
-DFI_smh_pl <- read_csvs("DFI_smh_pl")
-DFI_smh_aa <- read_csvs("DFI_smh_aa")
-DFI_smm_pl <- read_csvs("DFI_smm_pl")
-DFI_smm_hp <- read_csvs("DFI_smm_hp")
-DFI_smm_ag <- read_csvs("DFI_smm_ag")
-DFI_sa_vtdc <- read_csvs("DFI_sa_vtdc")
-DFI_vta_cde <- read_csvs("DFI_vta_cde")
-DFI_cerc_bs <- read_csvs("DFI_cerc_bs")
-DFI_rst_bs <- read_csvs("DFI_rst_bs")
-
-DFI_sub <- rbind(DFI_cerc_thp, DFI_cerc_hp, DFI_cerc_ag, DFI_copa_crcx,
-  DFI_copa_vtdc, DFI_df_ag, DFI_df_aa, DFI_fopa_crcx, DFI_fopa_thp, DFI_fopa_ag, 
-  DFI_rst_aa, DFI_smh_cde, DFI_smh_pt, DFI_smh_pl, DFI_smh_aa, DFI_smm_pl, 
-  DFI_smm_hp, DFI_smm_ag, DFI_sa_vtdc, DFI_vta_cde, DFI_cerc_bs, DFI_rst_bs)
-DFI_sub[1:5] <- apply(DFI_sub[1:5], 2, p.adjust, method = "fdr")
-DFI_sub <- filter(DFI_sub, PathAB_p < 0.05, PathA_p < 0.05, PathB_p < 0.05,
-                  PathC_p < 0.05, PathCC_p < 0.05)
+# mediation - DFI 22 cortico-subcortical RSFCs (67 significant results)
+DFI_sub <- mediation_fdr(colnames(DFI1$network_sub), "rsfmri_cor_ngd_", 
+  "DFI_", "scs_")
 
 # 4. Cross Lag Panel Model -----------------------------------------------------
 # time: year2 - year3
@@ -478,6 +412,7 @@ time1_time2_x2 <- vector()
 time1_x2_DFI <- vector()
 time2_x2_DFI <- vector()
 
+# get p-values
 for(i in seq(behavior_year3)) {
   time1_time2_PFI[i] <- clpm_all[[i]][1, 8]
   crosslag_x1_PFI[i] <- clpm_all[[i]][2, 8]
@@ -567,7 +502,7 @@ basic_stat <- function(data) {
   sd_edu_parent <- sd(data$edu_parent) %>% round(2)
   race <- unlist(table(data$race_ethnicity))
   return(c(N, female_percent, mean_age, sd_age, income_parent, sd_income_parent,
-           edu_parent, sd_edu_parent, race))
+    edu_parent, sd_edu_parent, race))
 }
 
 demographic_table <- rbind(basic_stat(abcd_year2_behavior),

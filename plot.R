@@ -241,12 +241,12 @@ cortico_subcortical <- function(data) {
     "ag", "aa", "vtdc", "bs")
 
   network_subcortical_label <- c("AN", "CON", "CPN", "DMN", "DAN", "FPN", "RTN",
-    "SHN", "SMN", "SN", "VAN", "VN", "Crcx",  "Tha", "Cde",
-    "Pt", "Pl", "Hip", "Amg", "NAc", "Vtdc", "BS")
+    "SHN", "SMN", "SN", "VAN", "VN", "Crcx",  "Tha", "Cde", "Pt", "Pl", "Hip", 
+    "Amg", "NAc", "Vtdc", "BS")
 
-   template <- c("au", "cerc", "copa", "df", "dsa", "fopa", "rst",
-    "smh", "smm", "sa", "vta", "vs", "crcx", "thp", "cde", "pt", "pl", "hp",
-    "ag", "aa", "vtdc", "bs")
+   template <- c("au", "cerc", "copa", "df", "dsa", "fopa", "rst", "smh", "smm", 
+    "sa", "vta", "vs", "crcx", "thp", "cde", "pt", "pl", "hp", "ag", "aa", 
+    "vtdc", "bs")
 
   network_df <- data.frame(
     "from" = template,
@@ -258,8 +258,10 @@ cortico_subcortical <- function(data) {
   network_to <- str_split(colnames(data), "_scs_", simplify = TRUE)[, 2]
   edges <- data.frame("from" = network_from, "to" = network_to)
   network_df <- rbind(edges, network_df)
-  network_df$from <- factor(network_df$from, levels = network_subcortical, labels = network_subcortical_label)
-  network_df$to <- factor(network_df$to, levels = network_subcortical, labels = network_subcortical_label)
+  network_df$from <- factor(network_df$from, levels = network_subcortical, 
+                            labels = network_subcortical_label)
+  network_df$to <- factor(network_df$to, levels = network_subcortical, 
+                          labels = network_subcortical_label)
   network_df$t_value <- c(unlist(data[1, ]), rep(NA, length(template)))
 
   return(network_df)
@@ -322,7 +324,7 @@ chordDiagram(
   annotationTrackHeight = c(0.01, 0.02),
   transparency = 0.6,
   col = col_fun(cs_DFI$t_value),
-  order = c("CON", "CPN", "DMN",  "RTN", "VAN", "SN", "DAN", "FPN", "SHN",
+  order = c("CON", "CPN", "DMN", "RTN", "VAN", "SN", "DAN", "FPN", "SHN",
     "SMN", "AN", "VN", "Crcx",  "Tha", "Hip", "Amg", "Pl", "Pt", "Cde", "NAc",
     "Vtdc", "BS"),
   scale = TRUE
@@ -505,20 +507,8 @@ modify_behavior_name <- function(data) {
 # volume - PFI
 PFI_volume_all_plot <- plot_mat(PFI_volume_all, "PFI_", "PFI")
 
-# volume - DFI (no significant results)
-# DFI_volume_all_plot <- plot_mat(DFI_volume_all, "DFI_", "DFI")
-
-# combine PFI and DFI (Volume)
-# mediation_volume_plot <- rbind(PFI_volume_all_plot, DFI_volume_all_plot)
-
-# RSFC - PFI (no significant results)
-# PFI_fc_plot <- plot_mat(PFI_fc, "PFI_", "PFI")
-
 # RSFC - DFI
 DFI_fc_plot <- plot_mat(DFI_fc, "DFI_", "DFI")
-
-# combine PFI and DFI (RSFC)
-# mediation_fc_plot <- rbind(PFI_fc_plot, DFI_fc_plot)
 
 DFI_fc_plot$V1 <- str_replace(DFI_fc_plot$V1, "_", "-") %>%
   str_replace("dt", "DMN") %>%
@@ -547,8 +537,8 @@ mediation_plot$V1 <- factor(mediation_plot$V1,
 mediation_plot$V2 <- factor(mediation_plot$V2,
   levels = unique(arrange(mediation_plot, desc(inventory), desc(V2))$V2))
 
-ggplot(mediation_plot, aes(V2, V1, color = peers, shape = peers)) +
-  geom_point(alpha = 0.7, size = 10) +
+ggplot(mediation_plot, aes(V2, V1, color = peers)) +
+  geom_point(shape = 17, alpha = 0.7, size = 8) +
   labs(x = NULL, y = NULL) +
   facet_grid(~inventory, scales = "free") +
   theme_bw() +
@@ -705,7 +695,7 @@ p1 + p2 + p3 +
 ggsave("figures/sFigure3_Neurotrasmitter.svg", width = 18, height = 6)
 
 # Supplementary Figure 4 (DFI, mediation)---------------------------------------
-# sFigure 3a (brain connectivity)
+# sFigure 4a (brain connectivity)
 set.seed(12)
 df1 <- matrix(rnorm(68^2), 68, 68)
 df1 <- ifelse(df1 > 2.85, 1, 0)
@@ -721,7 +711,7 @@ brainconn(conmat = df1, atlas = "dk68", view = "left",
   )
 # ggsave("figures/sFigure4a.svg", width = 15, height = 8, bg = "transparent")
 
-# sFigure 3b
+# sFigure 4b
 DFI_sub_plot <- plot_mat(DFI_sub, "DFI_", "DFI")
 DFI_sub_plot$V1 <- str_replace(DFI_sub_plot$V1, "_", "-") %>%
   str_replace("df", "DMN") %>%
@@ -756,7 +746,7 @@ DFI_sub_plot$V2 <- factor(
 )
 
 ggplot(DFI_sub_plot, aes(V2, V1)) +
-  geom_point(alpha = 0.8, size = 5, color = "#2166AC") +
+  geom_point(shape = 17, alpha = 0.8, size = 8, color = "#2166AC") +
   geom_hline(aes(yintercept = V2), color = "grey") +
   scale_y_discrete(limits=rev) +
   labs(x = NULL, y = NULL) +
@@ -768,11 +758,11 @@ ggplot(DFI_sub_plot, aes(V2, V1)) +
     axis.ticks.length.x = unit(-0.1, "cm"),
     axis.text.x = element_text(size = 15, angle = 30, hjust = 1),
     axis.text.y = element_text(size = 20, face = "bold"),
-    panel.background = element_rect(fill='transparent'),
-    plot.background = element_rect(fill='transparent', color=NA),
+    panel.background = element_rect(fill = "transparent"),
+    plot.background = element_rect(fill = "transparent", color = NA),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    legend.background = element_rect(fill='transparent'),
+    legend.background = element_rect(fill = "transparent"),
     strip.text = element_blank(),
     panel.spacing = unit(2, "lines")
   )

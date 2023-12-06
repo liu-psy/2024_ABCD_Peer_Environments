@@ -461,13 +461,13 @@ neurotranmitter_radar <- function(x, peer, color, title, tag) {
 
 p1 <- neurotranmitter_radar(Neurotransmitters_vol, "PFI", "#7FC97F", "a", 
                             "Volume")
-p2 <- neurotranmitter_radar(Neurotransmitters_vol, "DFI", "#9ECAE1", "b", 
+p2 <- neurotranmitter_radar(Neurotransmitters_vol, "DFI", "#9ECAE1", "d", 
                             "Volume")
-p3 <- neurotranmitter_radar(Neurotransmitters_area, "PFI", "#7FC97F", "c", 
+p3 <- neurotranmitter_radar(Neurotransmitters_area, "PFI", "#7FC97F", "b", 
                             "Area")
-p4 <- neurotranmitter_radar(Neurotransmitters_area, "DFI", "#9ECAE1", "d", 
+p4 <- neurotranmitter_radar(Neurotransmitters_area, "DFI", "#9ECAE1", "e", 
                             "Area")
-p5 <- neurotranmitter_radar(Neurotransmitters_thick, "PFI", "#7FC97F", "e", 
+p5 <- neurotranmitter_radar(Neurotransmitters_thick, "PFI", "#7FC97F", "c", 
                             "Thicknes")
 p6 <- neurotranmitter_radar(Neurotransmitters_thick, "DFI", "#9ECAE1", "f", 
                             "Thicknes")
@@ -567,8 +567,8 @@ mediation_plot$V1 <- factor(mediation_plot$V1,
 mediation_plot$V2 <- factor(mediation_plot$V2,
   levels = unique(arrange(mediation_plot, desc(inventory), desc(V2))$V2))
 
-ggplot(mediation_plot, aes(V2, V1, color = peers, shape = peers)) +
-  geom_point(alpha = 0.7, size = 10) +
+ggplot(mediation_plot, aes(V2, V1, color = peers)) +
+  geom_point(shape = 17, alpha = 0.7, size = 8) +
   labs(x = NULL, y = NULL) +
   facet_grid(~inventory, scales = "free") +
   theme_bw() +
@@ -592,9 +592,9 @@ ggplot(mediation_plot, aes(V2, V1, color = peers, shape = peers)) +
     legend.key.width = unit(1, 'cm'),
     legend.position = "right",
     legend.box.background = element_blank(),
-    legend.background = element_rect(fill='transparent'),
-    panel.background = element_rect(fill='transparent'),
-    plot.background = element_rect(fill='transparent', color=NA),
+    legend.background = element_rect(fill = "transparent"),
+    panel.background = element_rect(fill = "transparent"),
+    plot.background = element_rect(fill = "transparent", color = NA),
     strip.text = element_blank(),
     panel.spacing = unit(2, "lines"))
 ggsave("sFigure9c.svg", width = 30, height = 12, bg = "transparent")
@@ -634,7 +634,7 @@ DFI_sub_plot$V2 <- factor(
 )
 
 ggplot(DFI_sub_plot, aes(V2, V1)) +
-  geom_point(alpha = 0.8, size = 5, color = "#2166AC") +
+  geom_point(shape = 17, alpha = 0.8, size = 8, color = "#2166AC") +
   geom_hline(aes(yintercept = V2), color = "grey") +
   scale_y_discrete(limits=rev) +
   labs(x = NULL, y = NULL) +
@@ -645,12 +645,12 @@ ggplot(DFI_sub_plot, aes(V2, V1)) +
     axis.ticks.y = element_blank(),
     axis.ticks.length.x = unit(-0.1, "cm"),
     axis.text.x = element_text(size = 15, angle = 30, hjust = 1),
-    axis.text.y = element_text(size = 20, face = "bold"),
-    panel.background = element_rect(fill='transparent'),
-    plot.background = element_rect(fill='transparent', color=NA),
+    axis.text.y = element_text(size = 21, face = "bold"),
+    panel.background = element_rect(fill = "transparent"),
+    plot.background = element_rect(fill = "transparent", color = NA),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    legend.background = element_rect(fill='transparent'),
+    legend.background = element_rect(fill = "transparent"),
     strip.text = element_blank(),
     panel.spacing = unit(2, "lines")
   )

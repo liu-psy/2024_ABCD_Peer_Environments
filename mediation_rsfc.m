@@ -9,7 +9,7 @@ mediations_rsfcs = readtable('mediation_rsfc.csv');
 vars = mediations_rsfcs.Properties.VariableNames(2:120)';
 mediations = table2array(mediations_rsfcs(:,2:120));
 
-% PFI - cortical RSFCs
+% PFI - 8 cortical RSFCs
 PFI_ad_ca = PFI_rsfcs(mediations, find(strcmp(vars, 'rsfmri_c_ngd_ad_ngd_ca')));
 PFI_ad_sa = PFI_rsfcs(mediations, find(strcmp(vars, 'rsfmri_c_ngd_ad_ngd_sa')));
 PFI_cgc_dla = PFI_rsfcs(mediations, find(strcmp(vars, 'rsfmri_c_ngd_cgc_ngd_dla')));
@@ -19,7 +19,7 @@ PFI_ca_vs = PFI_rsfcs(mediations, find(strcmp(vars, 'rsfmri_c_ngd_ca_ngd_vs')));
 PFI_dt_fo = PFI_rsfcs(mediations, find(strcmp(vars, 'rsfmri_c_ngd_dt_ngd_fo')));
 PFI_dt_rspltp = PFI_rsfcs(mediations, find(strcmp(vars, 'rsfmri_c_ngd_dt_ngd_rspltp')));
 
-% DFI - cortical RSFCs
+% DFI - 8 cortical RSFCs
 DFI_dt_dt = DFI_rsfcs(mediations, find(strcmp(vars, 'rsfmri_c_ngd_dt_ngd_dt')));
 DFI_dla_dla = DFI_rsfcs(mediations, find(strcmp(vars, 'rsfmri_c_ngd_dla_ngd_dla')));
 DFI_smh_smh = DFI_rsfcs(mediations, find(strcmp(vars, 'rsfmri_c_ngd_smh_ngd_smh')));
@@ -29,7 +29,7 @@ DFI_dt_dla = DFI_rsfcs(mediations, find(strcmp(vars, 'rsfmri_c_ngd_dt_ngd_dla'))
 DFI_dla_vta = DFI_rsfcs(mediations, find(strcmp(vars, 'rsfmri_c_ngd_dla_ngd_vta')));
 DFI_smh_smm = DFI_rsfcs(mediations, find(strcmp(vars, 'rsfmri_c_ngd_smh_ngd_smm')));
 
-% DFI - cortico-subcortical RSFCs
+% DFI - 36 cortico-subcortical RSFCs
 DFI_au_cde = DFI_rsfcs(mediations, find(strcmp(vars, 'rsfmri_cor_ngd_au_scs_cde')));
 DFI_au_hp = DFI_rsfcs(mediations, find(strcmp(vars, 'rsfmri_cor_ngd_au_scs_hp')));
 DFI_au_aa = DFI_rsfcs(mediations, find(strcmp(vars, 'rsfmri_cor_ngd_au_scs_aa')));
