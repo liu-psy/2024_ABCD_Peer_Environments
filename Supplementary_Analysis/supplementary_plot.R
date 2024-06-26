@@ -45,19 +45,19 @@ behavior_names <- c(
   "CBCL - OCD",
   "CBCL - Stress problems",
   "Subsyndromal Mania (Parent) - Sum score",
-  "Trauma Events (Parent) - Total events",
-  "Trauma Events (Parent) - Good events",
-  "Trauma Events (Parent) - Bad events",
-  "Trauma Events (Parent) - Good affections",
-  "Trauma Events (Parent) - Bad affections",
-  "Trauma Events (Parent) - Mean affections",
-  "Trauma Events (Parent) - Total affections",
-  "Trauma Events - Total events",
-  "Trauma Events - Good events",
-  "Trauma Events - Bad events",
-  "Trauma Events - Good affections",
-  "Trauma Events - Bad affections",
-  "Trauma Events - Mean affections",
+  "Life Events (Parent) - Total events",
+  "Life Events (Parent) - Good events",
+  "Life Events (Parent) - Bad events",
+  "Life Events (Parent) - Good affections",
+  "Life Events (Parent) - Bad affections",
+  "Life Events (Parent) - Mean affections",
+  "Life Events (Parent) - Total affections",
+  "Life Events - Total events",
+  "Life Events - Good events",
+  "Life Events - Bad events",
+  "Life Events - Good affections",
+  "Life Events - Bad affections",
+  "Life Events - Mean affections",
   "Prodromal Psychosis - Total score",
   "Prodromal Psychosis - Distress score",
   "Impulsivity - Negative urgency",
@@ -90,8 +90,8 @@ mat_aossciations <- function(x, peer_type) {
     rep("Neurocognition", 3),
     rep("CBCL", 20),
     "Subsyndromal\nMania (Parent)",
-    rep("Trauma Events\n(Parent)", 7),
-    rep("Trauma Events", 6),
+    rep("Life Events\n(Parent)", 7),
+    rep("Life Events", 6),
     rep("Prodromal\nPsychosis", 2),
     rep("Impulsivity", 5),
     rep("Inhibition and\nReward-seeking", 7),
@@ -99,10 +99,10 @@ mat_aossciations <- function(x, peer_type) {
   )
   behavior_mat$group <- factor(
     behavior_mat$group,
-    levels = c("CBCL",  "Trauma Events", "Trauma Events\n(Parent)",
-               "Adverse Peer\nExperiences", "Prodromal\nPsychosis",
-               "Subsyndromal\nMania (Parent)", "Inhibition and\nReward-seeking",
-               "Impulsivity", "Neurocognition")
+    levels = c("CBCL",  "Life Events", "Life Events\n(Parent)",
+               "Prodromal\nPsychosis", "Subsyndromal\nMania (Parent)", 
+               "Inhibition and\nReward-seeking", "Impulsivity", 
+               "Adverse Peer\nExperiences", "Neurocognition")
   )
 
   behavior_mat$pfdr <- p.adjust(behavior_mat$p, method = "fdr")
@@ -125,15 +125,17 @@ behavior_friends <- rbind(behavior_PFI, behavior_DFI)
 behavior_friends$seq <- rep(seq(behavior_year2), time = length(peers))
 behavior_friends$peers <- factor(behavior_friends$peers, levels = peers)
 
-p1 <- ggplot(behavior_friends, aes(group, t, color = peers)) +
+ggplot(behavior_friends, aes(group, t, color = peers)) +
   geom_point(size = 8, position = position_jitterdodge(), shape = 17,
              alpha = 0.8) +
+  annotate("text", x = 9.2, y = 4, size = 7,
+           label = expression(paste(bold(bolditalic("p")[fdr]), " ", bold("< 0.05")))) +
   scale_y_continuous(breaks = seq(-25, 20, 5)) +
   scale_color_manual(values = c("#3B7346", "#4286f4")) +
   labs(x = NULL, y = expression(paste(bolditalic("t"), " ", bold(value)))) +
   geom_hline(yintercept = 0, linewidth = 1) +
-  geom_hline(yintercept = 2.20, linewidth = 1, linetype = 2) +
-  geom_hline(yintercept = -2.20, linewidth = 1, linetype = 2) +
+  geom_hline(yintercept = 2.22, linewidth = 1, linetype = 2) +
+  geom_hline(yintercept = -2.22, linewidth = 1, linetype = 2) +
   theme_classic() +
   theme(
     axis.text.x = element_text(size = 20, hjust = 1, angle = 15, face = "bold"),
@@ -143,7 +145,7 @@ p1 <- ggplot(behavior_friends, aes(group, t, color = peers)) +
     legend.key.height = unit(1, 'cm'),
     legend.key.width = unit(1, 'cm'),
     legend.position = "top",
-    legend.text = element_text(size = 25),
+    legend.text = element_text(size = 35),
     legend.title = element_blank(),
     legend.box.background = element_blank(),
     strip.background = element_blank(),
@@ -208,28 +210,14 @@ p1 <- ggplot(PFI_vol) +
     plot.tag = element_text(size = 40, hjust = 0.5, face = "bold")
   )
 
-# PFI (area)
-PFI_area <- extract_region(PFI1, "area")
-p2 <- ggplot(PFI_area) +
-  geom_brain(atlas = dk, aes(fill = t), size = 0.5, show.legend = FALSE,
-    position = position_brain(. ~ side + hemi)) +
-  scale_fill_gradient2(limits = c(-4.5, 4.5), low = "#9ECAE1", high = "#EF6548",
-    mid = "white", midpoint = 0, na.value = "white", space = "Lab", name = "t") +
-  labs(tag = "b", title = "PFI (area)") +
-  theme_void() +
-  theme(
-    plot.title = element_text(size = 40, hjust = 0.5, face = "bold"),
-    plot.tag = element_text(size = 40, hjust = 0.5, face = "bold")
-  )
-
 # DFI (volume)
-DFI_vol <- data.frame("hemi" = "left", region = "lateral occipital", "t" = -3.50)
-p3 <- ggplot(DFI_vol) +
+DFI_vol <- data.frame("hemi" = "left", region = "lateral occipital", "t" = -3.45)
+p2 <- ggplot(DFI_vol) +
   geom_brain(atlas = dk, aes(fill = t), size = 0.5, show.legend = TRUE,
              position = position_brain(. ~ side + hemi)) +
   scale_fill_gradient2(limits = c(-4, 4), low = "#9ECAE1", high = "#EF6548",
     mid = "white", midpoint = 0, na.value = "white", space = "Lab", name = "t") +
-  labs(tag = "c", title = "DFI (volume)") +
+  labs(tag = "b", title = "DFI (volume)") +
   theme_void() +
   theme(plot.title = element_text(size = 26, hjust = 0.5)) + 
   theme_void() +
@@ -244,16 +232,17 @@ p3 <- ggplot(DFI_vol) +
   ) +
   guides(
     fill = guide_colorbar(
-      title = expression(paste(italic("t"), " value")),
+      title = expression(paste(bolditalic("t"), " ", bold(value))),
       title.position = "left",
+      title.hjust	= 0.5,
       label.position = "bottom",
       ticks = FALSE
     )
   )
 
-p1 + p2 + p3 + 
-  plot_layout(nrow = 3)
-ggsave("sFigure6.tiff", width = 20, height = 15, bg = "transparent")
+p1 + p2 +  
+  plot_layout(nrow = 2)
+ggsave("sFigure6.svg", width = 20, height = 10, bg = "transparent")
 
 # Association analysis (RSFCs, sFigure7) ---------------------------------------
 # cortical RSFCs
@@ -410,7 +399,7 @@ lgd_links <- Legend(
 dev.off()
 
 # Neurotransmitters (sFigure8) -------------------------------------------------
-Neurotransmitters <- read.csv("Resh.csv") %>%
+Neurotransmitters <- read.csv("pet/Resh.csv") %>%
   rename("Spearman" = Mean.Fisher.s.z..Spearman.rho., "PET" = PET.Map) %>%
   select(File, PET, Spearman, p_exact) %>%
   mutate(PET = str_replace(PET, "SERT", "5HTT")) %>%
@@ -504,10 +493,10 @@ ggplot(DFI_vol) +
   )
 ggsave("sFigure9b.svg", width = 15, height = 8)
 
-# sFigure7c
+# sFigure9c
 plot_mat <- function(data, index, group) {
   df <- str_split(rownames(data), index, simplify = TRUE)[, 2] %>%
-    str_split(" - ", simplify = TRUE) %>%
+    str_split("--", simplify = TRUE) %>%
     as.data.frame()
   df$p <- data$PathAB_p
   df$peers <- group
@@ -515,14 +504,11 @@ plot_mat <- function(data, index, group) {
 }
 
 modify_behavior_name <- function(data) {
-  for(i in 1:nrow(data)) {
-    data$V2[i] <- behavior_names[which(data$V2[i] == behavior_year2)]
-  }
   data$inventory <- str_split(data$V2, " - ", simplify = TRUE)[, 1]
   data$V2 <- str_split(data$V2, " - ", simplify = TRUE)[, 2]
   data$inventory <- factor(
     data$inventory,
-    levels = c("CBCL", "Trauma Events", "Trauma Events (Parent)",
+    levels = c("CBCL", "Life Events", "Life Events (Parent)",
       "Adverse Peer Experiences", "Prodromal Psychosis",
       "Subsyndromal Mania (Parent)", "Inhibition and Reward-seeking",
       "Impulsivity", "Neurocognition"))
@@ -559,18 +545,26 @@ mediation_plot <- rbind(mediation_fc_plot, PFI_volume_all_plot) %>%
 
 # modify variables
 mediation_plot$V1 <- factor(mediation_plot$V1,
-  levels = c(unique(mediation_fc_plot$V1), "ifpllh", "precnlh", "insularh", 
-    "putamenlh", "putamenrh", "pallidumrh", "aar"),
-  labels = c(unique(mediation_fc_plot$V1), "Inferior Parietal (L)",
-    "Precentral (L)", "Insula (R)", "Putamen (L)", "Putamen (R)",
-    "Pallidum (R)", "Accumbens (R)"))
+  levels = c(unique(mediation_fc_plot$V1), "precnlh", "putamenlh", "pallidumrh"),
+  labels = c(unique(mediation_fc_plot$V1), "Precentral (L)",  "Putamen (L)", 
+             "Pallidum (R)"))
+
+mediation_plot$inventory <- mediation_plot$inventory %>%
+  str_replace("Prodromal Psychosis", "Prodromal\nPsychosis") %>%
+  str_replace("Inhibition and Reward-seeking", "Inhibition and\nReward-seeking") %>%
+  str_replace("Adverse Peer Experiences", "Adverse Peer\nExperiences") %>%
+  str_replace("Life Events", "Life\nEvents") %>%
+  factor(levels = c("CBCL",  "Life\nEvents", "Adverse Peer\nExperiences", 
+                    "Prodromal\nPsychosis", "Inhibition and\nReward-seeking", 
+                    "Impulsivity", "Neurocognition"))
+
 mediation_plot$V2 <- factor(mediation_plot$V2,
   levels = unique(arrange(mediation_plot, desc(inventory), desc(V2))$V2))
 
 ggplot(mediation_plot, aes(V2, V1, color = peers)) +
   geom_point(shape = 17, alpha = 0.7, size = 8) +
   labs(x = NULL, y = NULL) +
-  facet_grid(~inventory, scales = "free") +
+  facet_grid(~inventory, scales = "free", space = "free", switch = "x") +
   theme_bw() +
   theme_cleveland() +
   scale_color_manual(name = "Mediator", values = c("#2166AC", "#7FC97F")) +
@@ -579,25 +573,27 @@ ggplot(mediation_plot, aes(V2, V1, color = peers)) +
     color = guide_legend(title.hjust = 0.5, title.position = "top",
     override.aes = list(size = 10),
     title.theme = element_text(size = 25, face = "bold"),
-    byrow = TRUE)) +
+    byrow = TRUE, reverse = TRUE)) +
   theme(
     axis.ticks.y = element_blank(),
     axis.ticks.length.x = unit(-0.1, "cm"),
-    axis.text.x = element_text(size = 15, angle = 30, hjust = 1),
+    axis.text.x = element_text(size = 20, angle = 60, hjust = 1),
     axis.text.y = element_text(size = 20, face = "bold"),
     legend.spacing.y = unit(1, "cm"),
     legend.title = element_text(size = 25, face = "bold"),
     legend.text = element_text(size = 25, face = "bold"),
     legend.key.height = unit(1, 'cm'),
     legend.key.width = unit(1, 'cm'),
-    legend.position = "right",
+    legend.position = "top",
     legend.box.background = element_blank(),
     legend.background = element_rect(fill = "transparent"),
     panel.background = element_rect(fill = "transparent"),
     plot.background = element_rect(fill = "transparent", color = NA),
-    strip.text = element_blank(),
+    strip.placement = "outside",
+    strip.background  = element_rect(fill='transparent', color=NA),
+    strip.text = element_text(size = 20, face = "bold"),
     panel.spacing = unit(2, "lines"))
-ggsave("sFigure9c.svg", width = 30, height = 12, bg = "transparent")
+ggsave("sFigure9c.svg", width = 24, height = 13, bg = "transparent")
 
 # Mediation analysis (cortico-subcortical RSFCs, sFigure10b) -------------------
 DFI_sub_plot <- plot_mat(DFI_sub, "DFI_", "DFI")
@@ -626,8 +622,16 @@ DFI_sub_plot$V1 <- str_replace(DFI_sub_plot$V1, "_", "-") %>%
   str_replace("bs", "Brain Stem")
 DFI_sub_plot$V1 <- paste0(str_split(DFI_sub_plot$V1, "-", simplify = TRUE)[, 2],
   "-", str_split(DFI_sub_plot$V1, "-", simplify = TRUE)[, 1])
-
 DFI_sub_plot <- modify_behavior_name(DFI_sub_plot)
+
+DFI_sub_plot$inventory <- DFI_sub_plot$inventory %>%
+  str_replace("Prodromal Psychosis", "Prodromal\nPsychosis") %>%
+  str_replace("Inhibition and Reward-seeking", "Inhibition and\nReward-seeking") %>%
+  str_replace("Adverse Peer Experiences", "Adverse Peer\nExperiences") %>%
+  factor(levels = c("CBCL",  "Life Events", "Adverse Peer\nExperiences", 
+                    "Prodromal\nPsychosis", "Inhibition and\nReward-seeking", 
+                    "Impulsivity", "Neurocognition"))
+
 DFI_sub_plot$V2 <- factor(
   DFI_sub_plot$V2,
   levels = unique(arrange(DFI_sub_plot, desc(inventory), desc(V2))$V2)
@@ -638,31 +642,33 @@ ggplot(DFI_sub_plot, aes(V2, V1)) +
   geom_hline(aes(yintercept = V2), color = "grey") +
   scale_y_discrete(limits=rev) +
   labs(x = NULL, y = NULL) +
-  facet_grid(~inventory, scales = "free", space = "free") +
+  facet_grid(~inventory, scales = "free", switch = "x") +
   theme_bw() +
   theme_cleveland() +
   theme(
     axis.ticks.y = element_blank(),
     axis.ticks.length.x = unit(-0.1, "cm"),
-    axis.text.x = element_text(size = 15, angle = 30, hjust = 1),
-    axis.text.y = element_text(size = 21, face = "bold"),
+    axis.text.x = element_text(size = 20, angle = 30, hjust = 1),
+    axis.text.y = element_text(size = 20, face = "bold"),
     panel.background = element_rect(fill = "transparent"),
     plot.background = element_rect(fill = "transparent", color = NA),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     legend.background = element_rect(fill = "transparent"),
-    strip.text = element_blank(),
+    strip.placement = "outside",
+    strip.background  = element_rect(fill='transparent', color=NA),
+    strip.text = element_text(size = 25, face = "bold"),
     panel.spacing = unit(2, "lines")
   )
-ggsave("sFigure10b.svg", width = 24, height = 12, bg = "transparent")
+ggsave("sFigure10b.svg", width = 24, height = 13, bg = "transparent")
 
 # Longitudinal analysis (sFigure11) --------------------------------------------
 # PFI (sFigure11a)
 df1 <- data.frame(
   "vars" = c("Withdrawal depression", "Depression", "Sluggish cognitive tempo",
     "Prodromal psychosis (total)", "Prodromal psychosis (distress)"),
-  "Beta" = PFI_beta$beta)
-df1 <- df1[order(df1$Beta), ]
+  "Beta" = clpm_PFI_fdr$est)
+df1 <- df1[order(clpm_PFI_fdr$est), ]
 
 ggplot(df1, aes(label = vars, size = Beta, color = Beta)) +
   geom_text_wordcloud(shape = "circle", show.legend = TRUE) +
@@ -673,14 +679,14 @@ ggplot(df1, aes(label = vars, size = Beta, color = Beta)) +
   theme(
     legend.position = "bottom",
     legend.text = element_text(size = 30, face = "bold"),
-    legend.title = element_text(size = 30, face = "bold"),
+    legend.title = element_text(size = 40, face = "bold"),
     legend.key.height = unit(1.5, 'cm'),
     legend.key.width = unit(2.5, 'cm')
   ) +
   guides(
     size = FALSE,
     color = guide_colorbar(
-      title = "Beta",
+      title = expression(bolditalic(beta)),
       title.position = "left",
       label.position = "bottom",
       ticks = TRUE,
@@ -692,31 +698,30 @@ ggsave("sFigure11a.svg", width = 15, height = 8, bg = "transparent")
 
 # DFI (sFigure9b)
 df2 <- data.frame(
-  "vars" = c("Rulebreak", "Aggressive", "Externalizing", "Oppositional Defiant",
-    "Conduct", "Prodromal psychosis (total)", "Prodromal psychosis (distress)",
-    "Reputation aggression", "Reputation victimization",
-    "Overt aggression", "Overt victimization", "Relational aggression"),
-  "Beta" = DFI_beta$beta
+  "vars" = c("Rulebreak", "Externalizing", "Conduct problem", 
+    "Reputation aggression", "Overt aggression", "Overt victimization", 
+    "Relational aggression"),
+  "Beta" = clpm_DFI_fdr$est
 )
-df2 <- df2[order(df2$Beta, decreasing = TRUE), ]
+df2 <- df2[order(clpm_DFI_fdr$est, decreasing = TRUE), ]
 
 ggplot(df2, aes(label = vars, size = Beta, color = Beta)) +
   geom_text_wordcloud(shape = "circle", show.legend = TRUE) +
   scale_size_area(max_size = 20) +
   scale_color_gradient(low = "#4286f4", high = "#373B44",
-                       breaks = seq(0.035, 0.10, 0.015)) +
+                       breaks = seq(0.030, 0.070, 0.010)) +
   theme_minimal() +
   theme(
     legend.position = "bottom",
     legend.text = element_text(size = 30, face = "bold"),
-    legend.title = element_text(size = 30, face = "bold"),
+    legend.title = element_text(size = 40, face = "bold"),
     legend.key.height = unit(1.5, 'cm'),
     legend.key.width = unit(2.5, 'cm')
   ) +
   guides(
     size = FALSE,
     color = guide_colorbar(
-      title = "Beta",
+      title = expression(bolditalic(beta)),
       title.position = "left",
       label.position = "bottom",
       ticks = TRUE,

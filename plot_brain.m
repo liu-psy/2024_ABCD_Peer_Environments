@@ -1,7 +1,7 @@
-% This script is used to plot brain for Figure2
+ o% This script is used to plot brain for Figure2
 
 clear; clc
-cd H:/ABCD/Relsease4.0/Package_1194636/results/peer_environments
+cd H:/ABCD/Release4.0/Package_1194636/results/peer_environments
 
 % load data (68*2)
 dk_table = readmatrix('dk_table.txt');
